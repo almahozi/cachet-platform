@@ -1,12 +1,4 @@
 terraform {
-  cloud {
-    organization = "mahozi"
-
-    workspaces {
-      project = "Cachet Platform"
-      name = "cachet-platform"
-    }
-  }
 
   required_providers {
     aws = {
