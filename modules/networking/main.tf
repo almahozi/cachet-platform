@@ -8,7 +8,7 @@ resource "aws_vpc" "main" {
   }
 }
 
-data "aws_availavility_zones" "available" {
+data "aws_availavility_zone" "available" {
     state = "available"
 }
 
