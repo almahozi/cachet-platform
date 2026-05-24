@@ -3,7 +3,7 @@ resource "aws_security_group" "cachet_sg" {
   description = "Allow HTTP and SSH access for Cachet"
   vpc_id      = aws_vpc.main.id
 
-  tags {
+  tags = {
     Name = "cachet-sg"
   }
 }
