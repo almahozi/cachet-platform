@@ -1,0 +1,15 @@
+#!/bin/bash
+# System updates
+yum update -y
+yum install -y docker
+
+# Start and enable Docker
+systemctl start docker
+systemctl enable docker
+
+# Inject Database config
+mkdir -p /etc/cachet
+echo "DB_HOST=${db_endpoint}" > /etc/cachet/.env
+
+# Add a marker so you know the script finished
+echo "Setup complete at $(date)" >> /var/log/user_data.log
