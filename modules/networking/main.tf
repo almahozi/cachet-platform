@@ -22,3 +22,32 @@ resource "aws_subnet" "public_1" {
       Name = "cachet-public-1"
     }
 }
+
+# Private subnets
+
+resource "aws_subnet" "private_1" {
+  vpc_id = aws_vpc.main.id
+  cidr_block = "10.0.2.0/24"
+
+  tags = {
+    Name = "cachet-private-1"
+  }
+}
+
+resource "aws_subnet" "private_2" {
+  vpc_id = aws_vpc.main.id
+  cidr_block = "10.0.3.0/24"
+
+  tags = {
+    Name = "cachet-private-2"
+  }
+}
+
+resource "aws_db_subnet_group" "db_group" {
+  name       = "cachet-db-subnet-group"
+  subnet_ids = [aws_subnet.private_1.id, aws_subnet.private_2.id]
+
+  tags = {
+    Name = "cachet-db-subnet-group"
+  }
+}
