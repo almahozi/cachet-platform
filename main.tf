@@ -11,7 +11,7 @@ module "database" {
 
 module "compute" {
   source            = "./modules/compute"
-  subnet_id         = module.networking.public_subnet_id[0]
+  subnet_id         = module.networking.public_subnet_id
   security_group_id = module.networking.security_group_id
   db_endpoint       = module.database.db_endpoint
 }
