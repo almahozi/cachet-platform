@@ -16,3 +16,7 @@ module "compute" {
   security_group_id = module.networking.security_group_id
   db_endpoint       = module.database.db_endpoint
 }
+
+module "aim_cicd" {
+  source = "./modules/iam-cicd"
+}
