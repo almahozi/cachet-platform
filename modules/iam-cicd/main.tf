@@ -11,24 +11,16 @@ resource "aws_iam_role" "github_actions" {
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [
-      {
-        Effect = "Allow"
-        Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
-        Action    = "sts:AssumeRoleWithWebIdentity"
-        Condition = {
-          StringLike = {
-            "token.actions.githubusercontent.com:sub": "repo:almahozi/cachet-platform:*"
-          }
+    Statement = [{
+      Effect = "Allow"
+      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
+      Action    = "sts:AssumeRoleWithWebIdentity"
+      Condition = {
+        StringLike = {
+          "token.actions.githubusercontent.com:sub": "repo:almahozi/cachet-platform:*"
         }
-      },
-
-      {
-        Effect   = "Allow"
-        Action   = "ec2:DescribeInstances"
-        Resource = "*"
       }
-    ]
+    }]
   })
 }
 
@@ -43,6 +35,20 @@ resource "aws_iam_role_policy" "ssm_send_command" {
       Effect   = "Allow"
       Action   = "ssm:SendCommand"
       Resource = ["arn:aws:ssm:*:*:document/AWS-RunShellScript", "arn:aws:ec2:*:*:instance/*"]
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "describe_ec2_instances" {
+  name = "allow-describe-ec2-instances"
+  role = aws_iam_role.github_actions.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect   = "Allow"
+        Action   = ["ec2:DescribeInstances"]
+        Resource = ["*"]
     }]
   })
 }
