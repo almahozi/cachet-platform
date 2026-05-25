@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  chachet:
+    image: cachethq/chachet:latest
+    container_name: chachet
+    restart: always
+    ports:
+      - "80:80"
+    environment:
+      - DB_DRIVER=mysql
+      - DB_HOST=${DB_HOST}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - APP_DEBUG=false
+      - APP_URL=http://localhost
+
+    networks:
+      - cachet-net
+
+networks:
+  cachet-net:
+    driver: bridge
