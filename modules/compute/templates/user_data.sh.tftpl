@@ -1,15 +1,14 @@
 #!/bin/bash
-# System updates
+# Install docker and compose
 yum update -y
-yum install -y docker
+amazon-linux-extras install docker -y
+service docker start
+usermod -a -G docker ec2-user
 
-# Start and enable Docker
-systemctl start docker
-systemctl enable docker
+# Pull the Docker Compose file (we'll manage this via CI/CD later)
+mkdir -p /opt/cachet
+# ... (commands to create or pull your docker-compose.yml) ...
 
-# Inject Database config
-mkdir -p /etc/cachet
-echo "DB_HOST=${db_endpoint}" > /etc/cachet/.env
-
-# Add a marker so you know the script finished
-echo "Setup complete at $(date)" >> /var/log/user_data.log
+# Run the app
+cd /opt/cachet
+docker-compose up -d
