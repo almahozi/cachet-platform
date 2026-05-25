@@ -17,6 +17,6 @@ module "compute" {
   db_endpoint       = module.database.db_endpoint
 }
 
-module "aim_cicd" {
+module "iam_cicd" {
   source = "./modules/iam-cicd"
 }
