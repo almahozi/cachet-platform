@@ -2,7 +2,7 @@ name: Deploy Cachet
 on:
   push:
     branches:
-      - main
+      - master
 
 permissions:
   id-token: write
@@ -20,7 +20,7 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
-          
+
       - name: Deploy to EC2
         run: |
           # 1. Dynamically find the instance ID using the Name tag
