@@ -1,0 +1,44 @@
+name: Deploy Cachet
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          
+      - name: Deploy to EC2
+        run: |
+          # 1. Dynamically find the instance ID using the Name tag
+          INSTANCE_ID=$(aws ec2 describe-instances \
+            --filters "Name=tag:Name,Values=cachet-app-server" "Name=instance-state-name,Values=running" \
+            --query "Reservations[0].Instances[0].InstanceId" \
+            --output text)
+
+          # 2. Check if instance was found
+          if [ "$INSTANCE_ID" == "None" ]; then
+            echo "Error: Could not find a running instance with tag Name=cachet-app-server"
+            exit 1
+          fi
+
+          echo "Deploying to instance: $INSTANCE_ID"
+
+          # 3. Trigger the deployment
+          aws ssm send-command \
+            --document-name "AWS-RunShellScript" \
+            --targets "Key=instanceids,Values=$INSTANCE_ID" \
+            --parameters 'commands=["cd /opt/cachet && docker-compose pull && docker-compose up -d"]'
