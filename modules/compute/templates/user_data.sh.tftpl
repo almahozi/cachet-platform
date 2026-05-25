@@ -2,6 +2,8 @@
 # Install docker and compose
 yum update -y
 amazon-linux-extras install docker -y
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl start amazon-ssm-agent
 service docker start
 usermod -a -G docker ec2-user
 
