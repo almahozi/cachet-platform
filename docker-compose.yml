@@ -2,20 +2,33 @@ version: '3.8'
 
 services:
   chachet:
-    image: cachethq/chachet:latest
-    container_name: chachet
+    image: cachethq/docker:latest
+    container_name: cachet
     restart: always
     ports:
-      - "80:80"
+      - "80:8000"
     environment:
-      - DB_DRIVER=mysql
-      - DB_HOST=${DB_HOST}
-      - DB_DATABASE=${DB_DATABASE}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
+      - APP_KEY=${APP_KEY}              
+      - APP_ENV=production
       - APP_DEBUG=false
-      - APP_URL=http://localhost
+      - DB_DRIVER=mysql
+      - DB_HOST=${DB_HOST}    
+      - DB_DATABASE=cachet
+      - DB_USERNAME=admin
+      - DB_PASSWORD=yagHxgDb0GCwf89EXdTkm4HqGTJmkNHp
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - cachet-net
 
+  redis:
+    image: redis:alpine
+    container_name: cachet-redis
+    restart: always
     networks:
       - cachet-net
 

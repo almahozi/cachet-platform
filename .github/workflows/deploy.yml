@@ -9,6 +9,23 @@ permissions:
   contents: read
 
 jobs:
+  get-role:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      role_arn: ${{ steps.output.outputs.role_arn }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Terraform Output
+        id: output
+        run: |
+          # Initialize and get the ARN from state
+          terraform init
+          echo "role_arn=$(terraform output -raw github_actions_role_arn)" >> $GITHUB_OUTPUT
+
   deploy:
     runs-on: ubuntu-latest
     steps:
@@ -18,19 +35,22 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ vars.AWS_REGION }}
+          role-to-assume: ${{ needs.get-role.outputs.role_arn }}
+          aws-region: eu-central-1
 
       - name: Deploy to EC2
         run: |
-          # 1. Dynamically find the instance ID using the Name tag
+          # Retrieve the database endpoint from Terraform state
+          DB_ENDPOINT=$(terraform output -raw db_endpoint)
+
+          # Dynamically find the instance ID using the Name tag
           INSTANCE_ID=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=cachet-app-server" \
                       "Name=instance-state-name,Values=running" \
             --query "Reservations[0].Instances[0].InstanceId" \
             --output text)
 
-          # 2. Check if instance was found
+          # Check if instance was found
           if [ "$INSTANCE_ID" == "None" ]; then
             echo "Error: Could not find a running instance with tag Name=cachet-app-server"
             exit 1
@@ -38,7 +58,7 @@ jobs:
 
           echo "Deploying to instance: $INSTANCE_ID"
 
-          # 3. Trigger the deployment
+          # Trigger the deployment
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=instanceids,Values=$INSTANCE_ID" \
