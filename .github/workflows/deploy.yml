@@ -55,5 +55,6 @@ jobs:
                 "APP_KEY=${{ secrets.APP_KEY }}",
                 "echo DB_HOST=$DB_HOST > /opt/cachet/.env",
                 "echo APP_KEY=$APP_KEY >> /opt/cachet/.env",
+                "curl -o /opt/cachet/docker-compose.yml https://raw.githubusercontent.com/almahozi/cachet-platform/master/docker-compose.yml",
                 "cd /opt/cachet && docker-compose pull && docker-compose up -d"
               ]'
