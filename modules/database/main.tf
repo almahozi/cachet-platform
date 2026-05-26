@@ -17,3 +17,9 @@ resource "aws_db_instance" "cachet_db" {
   skip_final_snapshot = true
   publicly_accessible = false
 }
+
+resource "aws_ssm_parameter" "db_host" {
+  name  = "/cachet/prod/DB_HOST"
+  type  = "String"
+  value = aws_db_instance.cachet_db.endpoint
+}
