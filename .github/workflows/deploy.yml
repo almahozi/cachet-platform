@@ -9,23 +9,6 @@ permissions:
   contents: read
 
 jobs:
-  get-role:
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    outputs:
-      role_arn: ${{ steps.output.outputs.role_arn }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Terraform Output
-        id: output
-        run: |
-          # Initialize and get the ARN from state
-          terraform init
-          echo "role_arn=$(terraform output -raw github_actions_role_arn)" >> $GITHUB_OUTPUT
-
   deploy:
     runs-on: ubuntu-latest
     steps:
@@ -35,7 +18,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ needs.get-role.outputs.role_arn }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
 
       - name: Deploy to EC2
