@@ -21,11 +21,16 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-central-1
 
+      - name: Fetch parameters from SSM
+        run: |
+          DB_HOST=$(aws ssm get-parameter \
+            --name "/cachet/prod/DB_HOST" \
+            --query "Parameter.Value" \
+            --output text)
+          echo "DB_HOST=$DB_HOST" >> $GITHUB_ENV
+
       - name: Deploy to EC2
         run: |
-          # Retrieve the database endpoint from Terraform state
-          DB_ENDPOINT=$(terraform output -raw db_endpoint)
-
           # Dynamically find the instance ID using the Name tag
           INSTANCE_ID=$(aws ec2 describe-instances \
             --filters "Name=tag:Name,Values=cachet-app-server" \
@@ -45,4 +50,10 @@ jobs:
           aws ssm send-command \
             --document-name "AWS-RunShellScript" \
             --targets "Key=instanceids,Values=$INSTANCE_ID" \
-            --parameters 'commands=["cd /opt/cachet && docker-compose pull && docker-compose up -d"]'
+            --parameters 'commands=[
+                "DB_HOST=$(aws ssm get-parameter --name /cachet/prod/DB_HOST --query Parameter.Value --output text)",
+                "APP_KEY=$(aws ssm get-parameter --name /cachet/prod/APP_KEY --with-decryption --query Parameter.Value --output text)",
+                "echo DB_HOST=$DB_HOST > /opt/cachet/.env",
+                "echo APP_KEY=$APP_KEY >> /opt/cachet/.env",
+                "cd /opt/cachet && docker-compose pull && docker-compose up -d"
+              ]'
