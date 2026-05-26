@@ -52,7 +52,7 @@ jobs:
             --targets "Key=instanceids,Values=$INSTANCE_ID" \
             --parameters 'commands=[
                 "DB_HOST=$(aws ssm get-parameter --name /cachet/prod/DB_HOST --query Parameter.Value --output text)",
-                "APP_KEY=$(aws ssm get-parameter --name /cachet/prod/APP_KEY --with-decryption --query Parameter.Value --output text)",
+                "APP_KEY=${{ secrets.APP_KEY }}",
                 "echo DB_HOST=$DB_HOST > /opt/cachet/.env",
                 "echo APP_KEY=$APP_KEY >> /opt/cachet/.env",
                 "cd /opt/cachet && docker-compose pull && docker-compose up -d"
