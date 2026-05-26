@@ -1,16 +1,19 @@
 #!/bin/bash
-# Install docker and compose
+# Install Docker
 yum update -y
 amazon-linux-extras install docker -y
-sudo systemctl enable amazon-ssm-agent
-sudo systemctl start amazon-ssm-agent
 service docker start
+systemctl enable docker
 usermod -a -G docker ec2-user
 
-# Pull the Docker Compose file (we'll manage this via CI/CD later)
-mkdir -p /opt/cachet
-# ... (commands to create or pull your docker-compose.yml) ...
+# Install Docker Compose
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+  -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
 
-# Run the app
-cd /opt/cachet
-docker-compose up -d
+# SSM Agent (usually pre-installed on Amazon Linux 2 but just in case)
+systemctl enable amazon-ssm-agent
+systemctl start amazon-ssm-agent
+
+# Create app directory
+mkdir -p /opt/cachet
