@@ -52,3 +52,29 @@ resource "aws_iam_role_policy" "describe_ec2_instances" {
     }]
   })
 }
+
+resource "aws_iam_role_policy" "gh_actions_ssm" {
+  name = "gh-actions-ssm-read"
+  role = aws_iam_role.github_actions.id
+
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "ssm:GetParameter",
+          "ssm:GetParameters",
+          "ssm:GetParametersByPath"
+        ]
+        Resource = "arn:aws:ssm:*:*:parameter/cachet/prod/*"
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]          # needed for SecureString
+        Resource = "*"
+      }
+    ]
+  })
+}
