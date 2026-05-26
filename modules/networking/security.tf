@@ -27,3 +27,19 @@ resource "aws_security_group" "db_sg" {
   name = "cachet-db-sg"
   vpc_id = aws_vpc.main.id
 }
+
+resource "aws_vpc_security_group_egress_rule" "allow_db" {
+  security_group_id = aws_security_group.cachet_sg.id
+  from_port = 3306
+  to_port = 3306
+  ip_protocol = "tcp"
+  referenced_security_group_id = aws_security_group.db_sg.id
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_mysql_from_ec2" {
+  security_group_id            = aws_security_group.db_sg.id
+  from_port                    = 3306
+  to_port                      = 3306
+  ip_protocol                  = "tcp"
+  referenced_security_group_id = aws_security_group.cachet_sg.id
+}
